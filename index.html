@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Churn Prediction Ranking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #ffcc00;
+            --silver: #e0e0e0;
+            --bronze: #ff8c42;
+            --neon-blue: #00f2ff;
+            --bg-dark: #050505;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Rajdhani', sans-serif;
+            background: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #050505 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png');
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        header {
+            padding: 50px 0 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            background: linear-gradient(to bottom, #fff 40%, var(--neon-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.4));
+        }
+
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 25px;
+            margin: 40px auto 60px;
+            perspective: 1000px;
+        }
+
+        .podium-card {
+            position: relative;
+            width: 240px; /* Slightly wider for bigger text */
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px 15px;
+            transition: all 0.4s ease;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+
+        .podium-card.rank-1 { height: 300px; border-bottom: 4px solid var(--gold); order: 2; z-index: 2; scale: 1.1; }
+        .podium-card.rank-2 { height: 240px; border-bottom: 4px solid var(--silver); order: 1; }
+        .podium-card.rank-3 { height: 210px; border-bottom: 4px solid var(--bronze); order: 3; }
+
+        .medal-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* 🏆 Bigger Team Names on Podium */
+        .team-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem; /* Increased from 1.2rem */
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+        }
+
+        .score-badge {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--neon-blue);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px 16px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.7);
+        }
+
+        .table-container {
+            max-width: 1000px;
+            margin: 0 auto 100px;
+            padding: 0 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+        }
+
+        th {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: rgba(255,255,255,0.5);
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        tr td {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 22px 25px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* 📋 Bigger Team Names in Table */
+        .table-team-name {
+            font-size: 1.4rem; /* Increased size */
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #efefef;
+        }
+
+        td:first-child { border-radius: 10px 0 0 10px; border-left: 1px solid rgba(255,255,255,0.05); color: var(--neon-blue); font-weight: bold; font-family: 'Orbitron'; font-size: 1.1rem; }
+        td:last-child { 
+            border-radius: 0 10px 10px 0; 
+            border-right: 1px solid rgba(255,255,255,0.05); 
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.4rem;
+            color: #fff;
+            text-align: right;
+        }
+
+        tr:hover td { background: rgba(255, 255, 255, 0.07); }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 20px rgba(255, 204, 0, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(255, 204, 0, 0.4); }
+            100% { box-shadow: 0 0 20px rgba(255, 204, 0, 0.2); }
+        }
+        .rank-1 { animation: pulse-glow 3s infinite; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Live Rankings</h1>
+</header>
+
+<div class="podium-container" id="podium"></div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 15%; text-align: left;">Rank</th>
+                <th style="text-align: left;">Group Name</th>
+                <th style="text-align: right;">F1 Performance</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+</div>
+
+<script>
+    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjtpObhhHbdrCeY3LctwhnoZbytwgNpI4gKpEosomiRxBNiD-WNvd3ZP01cgYGl2hKIqpywY3-wguD/pub?gid=1074214421&single=true&output=csv";
+
+    async function loadLeaderboard() {
+        try {
+            const res = await fetch(sheetURL);
+            const data = await res.text();
+            const rows = data.split("\n").slice(1).filter(r => r.trim());
+            const parsed = rows.map(r => r.split(","));
+
+            parsed.sort((a, b) => parseFloat(b[1]) - parseFloat(a[1]));
+
+            const podium = document.getElementById("podium");
+            const table = document.getElementById("tableBody");
+
+            podium.innerHTML = "";
+            table.innerHTML = "";
+
+            const medals = ["🏆", "🥈", "🥉"];
+            for (let i = 0; i < 3 && i < parsed.length; i++) {
+                const team = parsed[i][0];
+                const score = (parseFloat(parsed[i][1])).toFixed(2) + "%";
+                podium.innerHTML += `
+                    <div class="podium-card rank-${i+1}">
+                        <div class="medal-icon">${medals[i]}</div>
+                        <div class="team-name">${team}</div>
+                        <div class="score-badge">${score}</div>
+                    </div>
+                `;
+            }
+
+            parsed.forEach((row, index) => {
+                if (index < 3) return;
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>#${index + 1}</td>
+                    <td class="table-team-name">${row[0]}</td>
+                    <td>${(parseFloat(row[1])).toFixed(2)}%</td>
+                `;
+                table.appendChild(tr);
+            });
+        } catch (e) {
+            console.error("Link Error:", e);
+        }
+    }
+
+    loadLeaderboard();
+    setInterval(loadLeaderboard, 10000);
+</script>
+
+</body>
+</html>
