@@ -212,16 +212,52 @@
 </div>
 
 <script>
-    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjtpObhhHbdrCeY3LctwhnoZbytwgNpI4gKpEosomiRxBNiD-WNvd3ZP01cgYGl2hKIqpywY3-wguD/pub?gid=1074214421&single=true&output=csv";
+    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjtpObhhHbdrCeY3LctwhnoZbytwgNpI4gKpEosomiRxBNiD-WNvd3ZP01cgYGl2hKIqpywY3-wguD/pub?output=csv";
+
+    /* ✅ FIXED CSV PARSER (handles quotes + newlines) */
+    function parseCSV(text) {
+        const rows = [];
+        let row = [];
+        let current = "";
+        let insideQuotes = false;
+
+        for (let char of text) {
+            if (char === '"') {
+                insideQuotes = !insideQuotes;
+            } else if (char === ',' && !insideQuotes) {
+                row.push(current);
+                current = "";
+            } else if (char === '\n' && !insideQuotes) {
+                row.push(current);
+                rows.push(row);
+                row = [];
+                current = "";
+            } else {
+                current += char;
+            }
+        }
+
+        row.push(current);
+        rows.push(row);
+
+        return rows;
+    }
 
     async function loadLeaderboard() {
         try {
             const res = await fetch(sheetURL);
             const data = await res.text();
-            const rows = data.split("\n").slice(1).filter(r => r.trim());
-            const parsed = rows.map(r => r.split(","));
 
-            parsed.sort((a, b) => parseFloat(b[1]) - parseFloat(a[1]));
+            /* ✅ USE NEW PARSER */
+            const rows = parseCSV(data).slice(1).filter(r => r.length > 1);
+
+            const parsed = rows.map(cols => ({
+                team: cols[2],                 // Group Name
+                score: parseFloat(cols[11]) || 0   // F1 Score
+            }));
+
+            /* ✅ CORRECT SORT */
+            parsed.sort((a, b) => b.score - a.score);
 
             const podium = document.getElementById("podium");
             const table = document.getElementById("tableBody");
@@ -230,9 +266,11 @@
             table.innerHTML = "";
 
             const medals = ["🏆", "🥈", "🥉"];
+
             for (let i = 0; i < 3 && i < parsed.length; i++) {
-                const team = parsed[i][0];
-                const score = (parseFloat(parsed[i][1])).toFixed(2) + "%";
+                const team = parsed[i].team;
+                const score = parsed[i].score.toFixed(2) + "%";
+
                 podium.innerHTML += `
                     <div class="podium-card rank-${i+1}">
                         <div class="medal-icon">${medals[i]}</div>
@@ -244,14 +282,17 @@
 
             parsed.forEach((row, index) => {
                 if (index < 3) return;
+
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td>#${index + 1}</td>
-                    <td class="table-team-name">${row[0]}</td>
-                    <td>${(parseFloat(row[1])).toFixed(2)}%</td>
+                    <td class="table-team-name">${row.team}</td>
+                    <td>${row.score.toFixed(2)}%</td>
                 `;
+
                 table.appendChild(tr);
             });
+
         } catch (e) {
             console.error("Link Error:", e);
         }
