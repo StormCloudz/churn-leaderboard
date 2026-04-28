@@ -142,6 +142,22 @@
             text-align: right;
         }
 
+        .subheading {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+
         /* 📱 MOBILE OPTIMIZATION */
         @media (max-width: 768px) {
             h1 {
@@ -194,6 +210,7 @@
 
 <header>
     <h1>Live Rankings</h1>
+    <p class="subheading">Customer Churn Prediction Competition</p>
 </header>
 
 <div class="podium-container" id="podium"></div>
@@ -301,6 +318,10 @@
     loadLeaderboard();
     setInterval(loadLeaderboard, 10000);
 </script>
+
+<footer class="footer">
+    SRM University-AP
+</footer>
 
 </body>
 </html>
