@@ -269,8 +269,8 @@
             const rows = parseCSV(data).slice(1).filter(r => r.length > 1);
 
             const parsed = rows.map(cols => ({
-                team: cols[2],                 // Group Name
-                score: parseFloat(cols[11]) || 0   // F1 Score
+                team: cols[2],
+                score: parseFloat(cols[11]) || 0
             }));
 
             /* ✅ CORRECT SORT */
@@ -291,7 +291,11 @@
                 podium.innerHTML += `
                     <div class="podium-card rank-${i+1}">
                         <div class="medal-icon">${medals[i]}</div>
-                        <div class="team-name">${team}</div>
+                        <div class="team-name">
+                            <a href="team.html?team=${encodeURIComponent(team)}&members=${encodeURIComponent(rows[i][3])}" style="color:inherit; text-decoration:none;">
+                                ${team}
+                            </a>
+                        </div>
                         <div class="score-badge">${score}</div>
                     </div>
                 `;
@@ -303,7 +307,11 @@
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td>#${index + 1}</td>
-                    <td class="table-team-name">${row.team}</td>
+                    <td class="table-team-name">
+                        <a href="team.html?team=${encodeURIComponent(row.team)}&members=${encodeURIComponent(rows[index][3])}" style="color:inherit; text-decoration:none;">
+                            ${row.team}
+                        </a>
+                    </td>
                     <td>${row.score.toFixed(2)}%</td>
                 `;
 
